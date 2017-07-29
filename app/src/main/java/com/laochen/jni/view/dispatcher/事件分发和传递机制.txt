@@ -1,0 +1,103 @@
+事件的分发其实是对MotionEvent事件的分发。即当一个MotionEvent产生后，系统需要根据一套规则把这个事件交给某个View/ViewGroup处理，
+这套规则就是事件分发机制。
+
+public boolean dispatchTouchEvent(MotionEvent ev)
+该方法用来进行事件的分发。如果事件能够传递到当前View/ViewGroup，该方法一定会被调用。
+该方法的返回值受当前View/ViewGroup的onTouchEvent和下级View/ViewGroup的dispatchTouchEvent方法的影响。
+返回true表示当前View/ViewGroup消费掉当前事件；否则不消费。
+
+public boolean onInterceptTouchEvent(MotionEvent ev)
+ViewGroup独有，dispatchTouchEvent方法内部调用，用来判断是否拦截事件。
+如果当前ViewGroup拦截了某个事件，那么在同一事件序列中，此方法不会再被调用。
+返回true表示拦截当前事件；否则不拦截。
+
+public boolean onTouchEvent(MotionEvent event)
+在dispatchTouchEvent方法内部调用，用来处理事件。
+返回true表示消费当前事件；否则不消费。
+如果不消费MotionEvent.ACTION_DOWN，那么在同一事件序列中，当前View/ViewGroup无法再接收任何事件。
+
+三个方法之间的关系，用伪代码表示为：
+public boolean dispatchTouchEvent(MotionEvent ev) {
+    boolean consume = false;
+    if (onInterceptTouchEvent(ev)) { // 如果当前ViewGroup拦截了事件，该事件就交给它的onTouchEvent方法处理
+        consume = onTouchEvent(ev);
+    } else { // 如果当前ViewGroup不拦截事件，就把事件传递给它的子元素
+        consume = child.dispatchTouchEvent(ev);
+    }
+
+    return consume;
+}
+
+同一事件序列：从ACTION_DOWN开始，中间有若干ACTION_MOVE，最终以ACTION_UP结束。
+
+ViewGroup一旦开始拦截某个事件，那么该事件序列的其它事件就会全部交给它处理（调用它的onTouchEvent方法），不会向ChildView分发，并且它的onInterceptTouchEvent方法不会再被调用。
+举例：
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    switch (ev.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            Log.e(TAG, "onInterceptTouchEvent#ACTION_DOWN");
+            return false; // ViewGroup不拦截ACTION_DOWN事件，该事件会向ChildView分发，下个事件到来，onInterceptTouchEvent方法还会被调用
+        case MotionEvent.ACTION_MOVE:
+            Log.e(TAG, "onInterceptTouchEvent#ACTION_MOVE");
+            return true; // ViewGroup拦截事件序列中的第一个ACTION_MOVE，该事件以及事件序列中的其它事件都会传递给自己的onTouchEvent方法处理，不会向ChildView分发
+                         // 并且onInterceptTouchEvent方法不会再被调用。
+        case MotionEvent.ACTION_UP:
+            Log.e(TAG, "onInterceptTouchEvent#ACTION_UP");
+           return false;
+    }
+    return true;
+}
+
+除了ViewGroup主动拦截外，还有三种情况会导致ViewGroup的onInterceptTouchEvent方法不会再被调用：（前提是ACTION_DOWN的点在ViewGroup上）
+1）ViewGroup没有ChildView
+2）ViewGroup有ChildView，但ACTION_DOWN的点不在ChildView上
+3）ViewGroup有ChildView并且ACTION_DOWN的点在ChildView上，但ChildView的onTouchEvent()中对ACTION_DOWN事件返回false。
+这三种情况的共同点是，能确定从某个事件开始，事件序列的其它事件会全部交给ViewGroup处理，因此无需再调用onInterceptTouchEvent判断是否需要拦截。
+
+在View/ViewGroup的onTouchEvent()方法中，如果不消费ACTION_DOWN事件，即ACTION_DOWN返回false，那么同一事件序列中的其它事件都不会交给它处理，而是交给父容器处理（onTouchEvent方法）。
+可以理解成目标控件连第一个事件都不愿意消费，那么它也应该不愿意消费其它事件，因此系统不会把同一事件序列中的其它事件传递给它（dispatchTouchEvent方法和onTouchEvent方法都不会再被调用）。
+举例：
+public boolean onTouchEvent(MotionEvent event) {
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_DOWN");
+            return false; // 不消费ACTION_DOWN事件，系统不会把同一事件序列中的其它事件传递进来，而是交给父容器处理。
+        case MotionEvent.ACTION_MOVE:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_MOVE");
+            break;
+        case MotionEvent.ACTION_UP:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_UP");
+            break;
+    }
+    return true;
+}
+
+在View/ViewGroup在onTouchEvent()方法中，如果不消费ACTION_DOWN以外的其它事件，那么这个事件会消失，不会传给父容器的onTouchEvent方法处理，
+当前View/ViewGroup可以持续接收事件序列的后续事件，这些消失的事件最终会传递给Activity（的onTouchEvent()方法）处理。
+举例：
+public boolean onTouchEvent(MotionEvent event) {
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_DOWN");
+            return true; // 消费ACTION_DOWN事件
+        case MotionEvent.ACTION_MOVE:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_MOVE");
+            return false; // 不消费ACTION_MOVE事件，该事件不会传给父容器，后续事件还能继续传来，事件最终传给Activity处理
+        case MotionEvent.ACTION_UP:
+            Log.e(TAG, "ChildView#onTouchEvent#ACTION_UP");
+            break;
+    }
+    return true;
+}
+
+ViewGroup默认实现是不拦截任何事件。
+View没有onInterceptTouchEvent方法，一旦有事件传递给View，它的onTouchEvent方法就会被调用。
+View/ViewGroup的默认onTouchEvent方法（ViewGroup继承了View的该方法）默认都会消费事件，即返回true；除非clickable和longClickable同时
+为false，其onTouchEvent方法才返回false。View的longClickable属性默认是false，clickable属性要分情况，比如Button的clickable属性默认为
+true，TextView的clickable属性默认为false。
+
+View的enable属性不影响onTouchEvent的默认返回值。
+
+onClick发生的前提是当前View/ViewGroup是可点击的，并且它收到了down和up事件。
+
+通过requestDisallowInterceptTouchEvent方法可以在子元素中干预父元素的事件分发过程，但是ACTION_DOWN事件除外。

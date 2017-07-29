@@ -1,0 +1,227 @@
+在ActivityThread中，当Activity对象被创建完毕后，会将DecorView添加到Window中，同时会创建ViewRootImpl对象，并将ViewRootImpl对象和DecorView对象关联。
+DecorView是顶级View，继承自FrameLayout，我们经常用的setContentView(R.id.xxx)是把布局文件添加到id为android.R.id.content的FrameLayout中，该FrameLayout是DecorView的子View。
+
+View的绘制流程从ViewRootImpl的performTraversals()方法开始：
+performMeasure()->measure()->onMeasure()
+performLayout()->layout()->onLayout()
+performDraw()->draw()->onDraw()
+
+measure过程决定了View的测量宽高，measure完成以后可以通过getMeasuredWidth和getMeasuredHeight方法获得View测量后的宽高。
+layout过程决定了View四个顶点的坐标和View的最终宽高，layout完成后可以通过getLeft,getTop,getRight,getBottom获得View四个顶点的位置，通过getWidth和getHeight得到View的最终宽高。
+draw过程决定了View的显示，draw完成后View的内容才能显示在屏幕上。
+
+View通过实现onMeasure()测量自己的宽高；
+ViewGroup通过实现onMeasure()测量子元素和自己的宽高。
+
+MeasureSpec：测量规格。
+对于顶级View（例如DecorView），其MeasureSpec由Window尺寸和其自身的LayoutParams共同决定；
+对于普通View，其MeasureSpec由父容器的MeasureSpec和其自身的LayoutParams共同决定。
+MeasureSpec一旦确定后，onMeasure中就可以确定View的测量宽高。
+在测量过程中，系统会将View的LayoutParams根据父容器所施加的规则转换为对应的MeasureSpec，然后根据MeasureSpec测量出View的宽高。
+MeasureSpec用一个32位int表示，高2位代表SpecMode，低30位代表SpecSize。
+public static class MeasureSpec {
+        private static final int MODE_SHIFT = 30;
+        private static final int MODE_MASK  = 0x3 << MODE_SHIFT;
+        // 测量规格模式：UNSPECIFIED，父容器对子View没有限制，要多大有多大，一般用于系统内部。
+        public static final int UNSPECIFIED = 0 << MODE_SHIFT;
+        // 测量规格模式：EXACTLY，父容器确定了子View的精确大小，子View的最终大小就是SpecSize指定的值，对应于LayoutParams中match_parent和具体数字两种情况。
+        public static final int EXACTLY     = 1 << MODE_SHIFT;
+        // 测量规格模式：AT_MOST，父容器指定了一个可用大小SpecSize，子View的大小不能大于这个值，对应于LayoutParams中的wrap_content。
+        public static final int AT_MOST     = 2 << MODE_SHIFT;
+
+        public static int makeMeasureSpec(int size, int mode) {
+            if (sUseBrokenMakeMeasureSpec) {
+                return size + mode;
+            } else {
+                return (size & ~MODE_MASK) | (mode & MODE_MASK);
+            }
+        }
+
+        public static int getMode(int measureSpec) {
+            return (measureSpec & MODE_MASK);
+        }
+
+        public static int getSize(int measureSpec) {
+            return (measureSpec & ~MODE_MASK);
+        }
+}
+########################################################################################################################
+普通View的MeasureSpec的创建规则：（由自身LayoutParams和父容器的MeasureSpec一起决定，来自于ViewGroup#getChildMeasureSpec(spec, padding, childDimension)）
+            parentSpecMode           EXACTLY                   AT_MOST                   UNSPECIFIED
+childLayoutParams
+    dp/px                        EXACTLY/childSize         EXACTLY/childSize          EXACTLY/childSize
+    match_parent                 EXACTLY/parentSize        AT_MOST/parentSize         UNSPECIFIED/0
+    wrap_content                 AT_MOST/parentSize        AT_MOST/parentSize         UNSPECIFIED/0
+
+childSize:View的LayoutParams中指定的具体宽高。
+parentSize：父容器中目前可使用的大小。
+int specSize = MeasureSpec.getSize(spec);
+parentSize = Math.max(0, specSize - padding);
+########################################################################################################################
+View的measure过程：
+由View的measure方法来完成，该方法是final的，会调用View的onMeasure()方法。
+/*
+* Measure the view and its content to determine the measured width and the
+* measured height. This method is invoked by {@link #measure(int, int)} and
+* should be overridden by subclasses to provide accurate and efficient
+* measurement of their contents.
+* @param widthMeasureSpec horizontal space requirements as imposed by the parent.
+*                         The requirements are encoded with
+*                         {@link android.view.View.MeasureSpec}.
+* @param heightMeasureSpec vertical space requirements as imposed by the parent.
+*                         The requirements are encoded with
+*                         {@link android.view.View.MeasureSpec}.
+*/
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+// 设置View宽高的测量值，给mMeasuredWidth和mMeasuredHeight赋值
+    setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
+                         getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
+}
+
+public static int getDefaultSize(int size, int measureSpec) {
+        int result = size;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        switch (specMode) {
+        case MeasureSpec.UNSPECIFIED:
+            result = size;
+            break;
+        case MeasureSpec.AT_MOST:
+        case MeasureSpec.EXACTLY:
+            result = specSize;
+            break;
+        }
+        return result;
+    }
+
+// mMinWidth由android:minWidth指定，如果没有指定那么为0
+// ShapeDrawable无原始宽高，BitmapDrawable有原始宽高。
+// 返回值是View在UNSPECIFIED模式下的测量宽。
+protected int getSuggestedMinimumWidth() {
+    return (mBackground == null) ? mMinWidth : max(mMinWidth, mBackground.getMinimumWidth());
+}
+
+protected int getSuggestedMinimumHeight() {
+    return (mBackground == null) ? mMinHeight : max(mMinHeight, mBackground.getMinimumHeight());
+}
+
+结论：从getDefaultSize看出，View的测量宽高由specSize决定。如果我们直接继承View的方式自定义View，并且用默认的onMeasure()方法，
+那么在布局中设置wrap_content时，得到的View的MeasureSpec是AT_MOST/parentSize，根据getDefaultSize方法的实现可以看出，View的测量宽高
+为父容器的当前剩余空间。这种效果和在布局中设置match_parent效果完全一样，这跟我们的预期不符合。
+应该重写onMeasure()方法：
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+    int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+    int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+    int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+    if (widthSpecMode == MeasureSpec.AT_MOST && heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(mWidth, mHeight); // mWidth, mHeight是指定的默认宽，高。
+    } else if (widthSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(mWidth, heightSpecSize);
+    } else if (heightSpecMode == MeasureSpec.AT_MOST) {
+        setMeasuredDimension(widthSpecSize, mHeight);
+    } else {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+}
+########################################################################################################################
+ViewGroup的measure过程：
+ViewGroup除了完成自己的Measure过程外，还要遍历去调用所有子元素的measure方法，各个子元素再递归执行这个过程。
+ViewGroup是一个抽象类，没有重写View的onMeasure方法，提供了一个measureChildren方法。
+
+/**
+ * Ask all of the children of this view to measure themselves, taking into
+ * account both the MeasureSpec requirements for this view and its padding.
+ * We skip children that are in the GONE state. The heavy lifting is done in
+ * getChildMeasureSpec.
+ *
+ * @param widthMeasureSpec The width requirements for this view
+ * @param heightMeasureSpec The height requirements for this view
+ */
+protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {
+    final int size = mChildrenCount;
+    final View[] children = mChildren;
+    for (int i = 0; i < size; ++i) {
+        final View child = children[i];
+        if ((child.mViewFlags & VISIBILITY_MASK) != GONE) {
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+}
+
+/**
+ * Ask one of the children of this view to measure itself, taking into
+ * account both the MeasureSpec requirements for this view and its padding.
+ * The heavy lifting is done in getChildMeasureSpec.
+ *
+ * @param child The child to measure
+ * @param parentWidthMeasureSpec The width requirements for this view
+ * @param parentHeightMeasureSpec The height requirements for this view
+ */
+protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
+    final LayoutParams lp = child.getLayoutParams();
+
+    final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+            mPaddingLeft + mPaddingRight, lp.width);
+    final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+            mPaddingTop + mPaddingBottom, lp.height);
+
+    // View.java中定义的final measure方法
+    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+}
+
+可以看出ViewGroup并没有定义具体的测量过程，这是因为ViewGroup是一个抽象类，其测量过程的onMeasure()需要子类具体实现。
+因为不同的ViewGroup子类有不同的布局特性，导致测量细节各不相同，因此ViewGroup无法做统一实现。
+
+举例：分析LinearLayout的onMeasure()
+onMeasure()会遍历调用子元素的measure()，这样各个子元素就开始依次进入measure过程。
+最后会根据子元素的情况调用setMeasuredDimension()来测量自己的大小。
+自定义ViewGroup的实现类，实现onMeasure()也要按照这样的逻辑。
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    if (mOrientation == VERTICAL) {
+        measureVertical(widthMeasureSpec, heightMeasureSpec);
+    } else {
+        measureHorizontal(widthMeasureSpec, heightMeasureSpec);
+    }
+}
+
+有些情况下，系统需要多次measure才能确定最终的测量宽高，在这种情况下，在onMeasure中拿到的测量宽高很可能不是准确的。
+一个较好的习惯是从onLayout中获取测量宽高或最终宽高。
+
+在Activity启动时获取View的宽高：
+在onCreate,onStart,onResume里获取都是不靠谱的，因为View的measure过程和Activity的生命周期不是同步的。
+有4中方法可以解决
+1）Activity/View#onWindowFocusChanged()
+Activity的Window得到或失去焦点时调用，一般来说，Activity的onResume/onPause执行时，onWindowFocusChanged()会被调用。
+包含View的Window得到或失去焦点时调用，与View得到或失去焦点不同。
+
+2）view.post(Runnable);
+
+3）view.getViewTreeObserver().addOnGlobalLayoutListener();
+
+4）view.measure(int widthMeasureSpec, int heightMeasureSpec)主动测量，需要根据view的LayoutParams来分。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,139 @@
+什么时候需要使用JNI？
+1）标准Java类库不支持平台相关的特性，但应用需要该特性。
+2）已经有库是用本地语言写的，为了Java代码能使用该库。
+3）部分代码对时间要求很苛刻，需要用底层语言编写。
+
+通过JNI编程，本地方法能够干哪些事情？
+1）创建、检查和更新Java对象（包括数组和字符串）。
+2）调用Java方法。
+3）捕获和抛出异常。
+4）加载类，获取类信息。
+5）执行运行时类型检查。
+
+Java基本类型及其对应的机器相关类型：
+Java Type	Native      Type Description
+boolean	    jboolean	unsigned 8 bits
+byte	    jbyte	    signed 8 bits
+char	    jchar	    unsigned 16 bits
+short	    jshort	    signed 16 bits
+int	        jint	    signed 32 bits
+long	    jlong	    signed 64 bits
+float	    jfloat	    32 bits
+double	    jdouble	    64 bits
+void	    void	    not applicable
+
+JNI引用类型及其对应的Java类：
+jobject
+    jclass (java.lang.Class objects)
+    jstring (java.lang.String objects)
+    jarray (arrays)
+        jobjectArray (object arrays)
+        jbooleanArray (boolean arrays)
+        jbyteArray (byte arrays)
+        jcharArray (char arrays)
+        jshortArray (short arrays)
+        jintArray (int arrays)
+        jlongArray (long arrays)
+        jfloatArray (float arrays)
+        jdoubleArray (double arrays)
+    jthrowable (java.lang.Throwable objects)
+
+类型签名：
+Type Signature	            Java Type
+            Z	            boolean
+            B	            byte
+            C	            char
+            S	            short
+            I	            int
+            J	            long
+            F	            float
+            D	            double
+            V               void
+Lfully-qualified-class ;	fully-qualified-class
+          [type	            type[]
+   (arg-types) ret-type 	method type
+例如：Java方法long f (int n, String s, int[] arr);
+对应的签名是：(ILjava/lang/String;[I)J
+
+JNI函数：
+1.JNI访问Java实例成员变量
+###################################################################################
+// 获取实例字段的id
+jfieldID GetFieldID(JNIEnv *env, jclass clazz, const char *name, const char *sig);
+
+env: the JNI interface pointer
+clazz: a Java class object.
+name: the field name in a 0-terminated modified UTF-8 string.
+sig: the field signature in a 0-terminated modified UTF-8 string.
+
+Returns a field ID, or NULL if the operation fails.
+NoSuchFieldError: if the specified field cannot be found.
+ExceptionInInitializerError: if the class initializer fails due to an exception.
+OutOfMemoryError: if the system runs out of memory.
+
+###################################################################################
+// 获取实例字段的值
+xxx GetXxxField(JNIEnv *env, jobject obj, jfieldID fieldID);
+
+xxx        Xxx
+jobject    Object
+jboolean   Boolean
+jbyte      Byte
+jchar      Char
+jshort     Short
+jint       Int
+jlong      Long
+jfloat     Float
+jdouble    Double
+
+env: the JNI interface pointer.
+obj: a Java object (must not be NULL).
+fieldID: a valid field ID.
+
+Returns the content of the field.
+
+###################################################################################
+// 设置实例字段的值
+void SetXxxField(JNIEnv *env, jobject obj, jfieldID fieldID, xxx value);
+
+env: the JNI interface pointer.
+obj: a Java object (must not be NULL).
+fieldID: a valid field ID.
+value: the new value of the field.
+
+###################################################################################
+2.JNI调用Java实例成员方法
+// 获取实例方法的id
+jmethodID GetMethodID(JNIEnv *env, jclass clazz, const char *name, const char *sig);
+
+env: the JNI interface pointer.
+clazz: a Java class object.
+name: the method name in a 0-terminated modified UTF-8 string.
+sig: the method signature in 0-terminated modified UTF-8 string.
+
+Returns a method ID, or NULL if the specified method cannot be found.
+
+NoSuchMethodError: if the specified method cannot be found.
+ExceptionInInitializerError: if the class initializer fails due to an exception.
+OutOfMemoryError: if the system runs out of memory.
+
+###################################################################################
+// 调用实例方法
+xxx CallXxxMethod(JNIEnv *env, jobject obj, jmethodID methodID, ...);
+
+xxx CallXxxMethodA(JNIEnv *env, jobject obj, jmethodID methodID, const jvalue *args);
+
+xxx CallXxxMethodV(JNIEnv *env, jobject obj, jmethodID methodID, va_list args);
+三个函数的差别在于传参机制。如果调用Java私有方法或者构造方法，methodID只能来自obj的class，不能是它的父类。
+xxx        Xxx
+void       Void
+jobject    Object
+jboolean   Boolean
+jbyte      Byte
+jchar      Char
+jshort     Short
+jint       Int
+jlong      Long
+jfloat     Float
+jdouble    Double
+

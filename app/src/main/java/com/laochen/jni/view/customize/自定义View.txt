@@ -1,0 +1,12 @@
+自定义View的分类：
+1）继承View重写onDraw()：主要用于实现一些不规则的效果。
+2）继承ViewGroup：主要用于实现自定义的布局。
+3）继承特定的View（例如TextView）：扩展某种View的功能。
+4）继承特定的ViewGroup（例如LinearLayout）：扩展某种ViewGroup的功能。
+
+需要注意的问题：
+1）让View支持wrap_content。重写onMeasure()方法。
+2）如有必要，让View支持padding。
+3）不要在View中使用Handler。View提供了post系列方法能够替代。
+4）View中如果有线程或者动画，可以在View#onDetachedFromWindow()中停止。
+5）View如果有滑动嵌套，需要处理好滑动冲突。
