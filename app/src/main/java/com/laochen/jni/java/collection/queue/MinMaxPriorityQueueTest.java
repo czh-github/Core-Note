@@ -15,44 +15,60 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 
 public class MinMaxPriorityQueueTest {
-    public static void main(String[] args) {
-        Queue<Integer> queue = Queues.synchronizedQueue(MinMaxPriorityQueue.orderedBy(new Comparator<Integer>() {
-            @Override
-            public int compare(Integer i1, Integer i2) {
-                if (i1 > i2) {
-                    return -1;
-                } else if (i1 < i2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+    private static Queue<Integer> queue = Queues.synchronizedQueue(MinMaxPriorityQueue.orderedBy(new Comparator<Integer>() {
+        @Override
+        public int compare(Integer i1, Integer i2) {
+            if (i1 > i2) {
+                return -1;
+            } else if (i1 < i2) {
+                return 1;
+            } else {
+                return 0;
             }
-        })
-        .maximumSize(5)
-        .create());
+        }
+    })
+            .maximumSize(5)
+            .create());
 
+//    public static Integer autoRemoved(Integer added) {
+//        if (queue.size() == 5) {
+//            if (queue.) {
+//
+//            }
+//        }
+//    }
 
+    public static void main(String[] args) {
         queue.offer(4);
         queue.offer(3);
         queue.offer(5);
         queue.offer(1);
         queue.offer(2);
 
-        queue.offer(6); // size超过5，移除Comparator最大的1
+        queue.offer(6); // size 超过maximumSize，auto remove greatest
         System.out.println(queue.toString());
         queue.offer(8); // 移除2
         System.out.println(queue.toString());
         queue.offer(7); // 移除3
         System.out.println(queue.toString());
 
-        System.out.println(queue.poll());
-        System.out.println(queue.poll());
-        System.out.println(queue.poll());
+        System.out.println("peek:" + queue.peek()); // get not remove smallest
+
+        System.out.println("poll:" + queue.poll()); // get and remove smallest
+        System.out.println("peek:" + queue.peek());
+        System.out.println("poll:" + queue.poll());
+        System.out.println("peek:" + queue.peek());
+        System.out.println("poll:" + queue.poll());
+        System.out.println("peek:" + queue.peek());
+        System.out.println("poll:" + queue.poll());
+        System.out.println("peek:" + queue.peek());
+        System.out.println("poll:" + queue.poll());
+        System.out.println("peek:" + queue.peek());
+        System.out.println("poll:" + queue.poll());
 
         BlockingQueue<String> bq = new LinkedBlockingDeque<>(10);
         bq.offer("a");
         System.out.println(bq.size());
-
 
 
 //        System.out.println(queue.poll()); // 取出并移除最小的元素，没有元素返回null

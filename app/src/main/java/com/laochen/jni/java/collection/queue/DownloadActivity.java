@@ -130,7 +130,7 @@ public class DownloadActivity extends AppCompatActivity {
     }
 
     private void download(long time, String url, String dir, String name) {
-        if (!ThumbnailManager.containsUrl(url) && !Utils.isFileExists(dir, name)) {
+        if (!Utils.isFileExists(dir, name) && !ThumbnailManager2.containsTaskId(url)) {
             produce(new ThumbnailDownloadTask(time, url, dir, name));
         }
     }
@@ -187,7 +187,7 @@ public class DownloadActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        ThumbnailManager.clear();
+        ThumbnailManager2.clear();
         super.onDestroy();
     }
 
@@ -195,18 +195,18 @@ public class DownloadActivity extends AppCompatActivity {
      * 往队列里添加任务
      */
     private void produce(ThumbnailDownloadTask task) {
-        ThumbnailManager.offer(task);
+        ThumbnailManager2.offer(task);
     }
 
-    private void produceAll(int start, int end) {
-       for (int i = start; i < end; i++) {
-           final String name = i + ".jpg";
-           if (!Utils.isFileExists(mDir, name)) {
-               ThumbnailDownloadTask task = new ThumbnailDownloadTask(System.currentTimeMillis(), ImageUrls.URLS[i], mDir, name);
-               produce(task);
-           }
-       }
-    }
+//    private void produceAll(int start, int end) {
+//       for (int i = start; i < end; i++) {
+//           final String name = i + ".jpg";
+//           if (!Utils.isFileExists(mDir, name)) {
+//               ThumbnailDownloadTask task = new ThumbnailDownloadTask(System.currentTimeMillis(), ImageUrls.URLS[i], mDir, name);
+//               produce(task);
+//           }
+//       }
+//    }
 
     /**
      * 从队列中取任务执行
@@ -216,9 +216,7 @@ public class DownloadActivity extends AppCompatActivity {
             @Override
             public void run() {
                 while (mRunning) {
-                    if (ThumbnailManager.canPoll()) {
-                        ThumbnailManager.execute(ThumbnailManager.poll());
-                    }
+                    ThumbnailManager2.execute(ThumbnailManager2.poll());
                 }
             }
         }).start();
@@ -282,11 +280,12 @@ public class DownloadActivity extends AppCompatActivity {
             final Bitmap bitmap = intent.getParcelableExtra("bitmap");
 
             if (tag == AsyncImageLoaderListener.SUCCESS && bitmap != null) {
-                if (url.equals(ImageUrls.URLS[mFirstVisibleItem])) {
+//                if (url.equals(ImageUrls.URLS[mFirstVisibleItem])) {
                     mImageView.setImageBitmap(bitmap);
-                }
+//                }
             }
 
+            ThumbnailManager2.removeIdFromList(url);
         }
     }
     private DownloadResultReceiver mReceiver;
@@ -294,7 +293,7 @@ public class DownloadActivity extends AppCompatActivity {
     private void registerDownloadResultReceiver() {
         if (mReceiver == null) {
             mReceiver = new DownloadResultReceiver();
-            IntentFilter filter = new IntentFilter(ThumbnailManager.ACTION_SEND_DOWNLOAD_RESULT);
+            IntentFilter filter = new IntentFilter(ThumbnailManager2.ACTION_SEND_DOWNLOAD_RESULT);
             registerReceiver(mReceiver, filter);
         }
     }

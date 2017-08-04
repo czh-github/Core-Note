@@ -40,6 +40,28 @@ public class ThumbnailManager {
 
     public static final String ACTION_SEND_DOWNLOAD_RESULT = "ACTION_SEND_DOWNLOAD_RESULT";
 
+
+    /**
+     * 任务状态：任务被加入到队列
+     */
+    public static final int TASK_STATE_ADD_TO_QUEUE = 0;
+    /**
+     * 任务状态：队列已满，任务被剔除
+     */
+    public static final int TASK_STATE_EVICT_FROM_QUEUE = 1;
+    /**
+     * 任务状态：任务进入线程池
+     */
+    public static final int TASK_STATE_POLL_TO_POOL = 2;
+    /**
+     * 任务状态：任务执行成功
+     */
+    public static final int TASK_STATE_EXECUTE_SUCCESS = 3;
+    /**
+     * 任务状态：任务执行失败
+     */
+    public static final int TASK_STATE_EXECUTE_FAILED = 4;
+
     // MinMaxPriorityQueue的特点在于队列的size如果超过了指定的size，会自动移除队列中最大的元素（根据Comparator规则）。
     // 不能将null插入MinMaxPriorityQueue。
     // 通过包装变成线程安全的queue。

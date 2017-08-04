@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.laochen.jni">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".java.collection.queue.JniApplication"
@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".java.collection.queue.DownloadActivity">
+        <activity android:name=".android.widget.recyclerview.RecyclerViewExampleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,6 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ActivityB">
+        </activity>
+        <activity android:name=".android.widget.recyclerview.PhotoActivity">
         </activity>
     </application>
 

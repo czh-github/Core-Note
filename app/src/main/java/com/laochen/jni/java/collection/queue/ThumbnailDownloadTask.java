@@ -2,6 +2,7 @@ package com.laochen.jni.java.collection.queue;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -18,7 +19,7 @@ import okhttp3.Response;
  * Description:
  */
 
-public class ThumbnailDownloadTask implements Runnable {
+public class ThumbnailDownloadTask implements Runnable, Comparable<ThumbnailDownloadTask> {
     private static final String TAG = "ThumbnailDownloadTask";
     private long mTime; // HHmmss
     private String mUrl; // 下载地址
@@ -138,4 +139,22 @@ public class ThumbnailDownloadTask implements Runnable {
         return "Thumbnail#" + mTime + "-" + mUrl;
     }
 
+    @Override
+    public int compareTo(@NonNull ThumbnailDownloadTask o) {
+        long time = o.getTime();
+        if (this.mTime > time) {
+            return -1;
+        } else if (this.mTime < time) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 返回task的id，每个task的id是独一无二的
+     */
+    public String getId() {
+        return mUrl;
+    }
 }
