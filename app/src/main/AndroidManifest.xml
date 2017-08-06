@@ -6,23 +6,23 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".java.collection.queue.JniApplication"
+        android:name="com.laochen.source.java.collection.queue.JniApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".android.widget.recyclerview.RecyclerViewExampleActivity">
+        <activity android:name="com.laochen.source.android.widget.recyclerview.RecyclerViewExampleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityB">
+        <activity android:name="com.laochen.source.ActivityB">
         </activity>
-        <activity android:name=".android.widget.recyclerview.PhotoActivity">
+        <activity android:name="com.laochen.source.android.widget.recyclerview.PhotoActivity">
         </activity>
     </application>
 

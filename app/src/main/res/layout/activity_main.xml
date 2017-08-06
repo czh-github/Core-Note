@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.laochen.jni.MainActivity">
+    tools:context="com.laochen.jni.com.laochen.source.MainActivity">
 
     <TextView
         android:id="@+id/sample_text"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:onClick="clickMe"/>
 
-    <com.laochen.jni.view.flow.SelfView
+    <com.laochen.source.view.flow.SelfView
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@color/colorPrimary"
