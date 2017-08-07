@@ -5,9 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.laochen.jni.view.scroll.ScrollViewActivity">
+    tools:context="com.laochen.jni.com.laochen.source.view.scroll.ScrollViewActivity">
 
-    <com.laochen.jni.view.scroll.ScrollView
+    <com.laochen.source.view.scroll.ScrollView
         android:id="@+id/scrollView"
         android:layout_width="100dp"
         android:layout_height="100dp"

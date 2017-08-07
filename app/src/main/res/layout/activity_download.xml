@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.laochen.jni.java.collection.queue.DownloadActivity">
+    tools:context="com.laochen.jni.com.laochen.source.java.collection.queue.DownloadActivity">
 
     <ImageView
         android:id="@+id/imageview"
