@@ -5,8 +5,6 @@ import com.google.common.collect.Queues;
 
 import java.util.Comparator;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Date:2017/7/10 <p>
@@ -15,16 +13,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 
 public class MinMaxPriorityQueueTest {
-    private static Queue<Integer> queue = Queues.synchronizedQueue(MinMaxPriorityQueue.orderedBy(new Comparator<Integer>() {
+    private static Queue<Person> queue = Queues.synchronizedQueue(MinMaxPriorityQueue.orderedBy(new Comparator<Person>() {
         @Override
-        public int compare(Integer i1, Integer i2) {
-            if (i1 > i2) {
-                return -1;
-            } else if (i1 < i2) {
-                return 1;
-            } else {
-                return 0;
-            }
+        public int compare(Person thiz, Person other) {
+            return thiz.age - other.age;
         }
     })
             .maximumSize(5)
@@ -39,17 +31,17 @@ public class MinMaxPriorityQueueTest {
 //    }
 
     public static void main(String[] args) {
-        queue.offer(4);
-        queue.offer(3);
-        queue.offer(5);
-        queue.offer(1);
-        queue.offer(2);
+        queue.offer(new Person("111", 10));
+        queue.offer(new Person("222", 10));
+        queue.offer(new Person("333", 10));
+        queue.offer(new Person("444", 10));
+        queue.offer(new Person("555", 10));
 
-        queue.offer(6); // size 超过maximumSize，auto remove greatest
+        queue.offer(new Person("666", 10)); // size 超过maximumSize，auto remove greatest
         System.out.println(queue.toString());
-        queue.offer(8); // 移除2
+        queue.offer(new Person("555", 10)); // 移除2
         System.out.println(queue.toString());
-        queue.offer(7); // 移除3
+        queue.offer(new Person("444", 10)); // 移除3
         System.out.println(queue.toString());
 
         System.out.println("peek:" + queue.peek()); // get not remove smallest
@@ -66,9 +58,9 @@ public class MinMaxPriorityQueueTest {
         System.out.println("peek:" + queue.peek());
         System.out.println("poll:" + queue.poll());
 
-        BlockingQueue<String> bq = new LinkedBlockingDeque<>(10);
-        bq.offer("a");
-        System.out.println(bq.size());
+//        BlockingQueue<String> bq = new LinkedBlockingDeque<>(10);
+//        bq.offer("a");
+//        System.out.println(bq.size());
 
 
 //        System.out.println(queue.poll()); // 取出并移除最小的元素，没有元素返回null
@@ -89,5 +81,23 @@ public class MinMaxPriorityQueueTest {
 //        System.out.println(queue.removeLast()); // 与pollLast()的唯一区别是，没有元素抛异常NoSuchElementException
 
 //        System.out.println(queue.toString());
+    }
+
+    public static class Person {
+        String name;
+        int age;
+
+        public Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
     }
 }

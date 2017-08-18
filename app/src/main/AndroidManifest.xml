@@ -24,6 +24,12 @@
         </activity>
         <activity android:name="com.laochen.source.android.widget.recyclerview.PhotoActivity">
         </activity>
+
+        <service
+            android:name="com.laochen.source.android.MyService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>
