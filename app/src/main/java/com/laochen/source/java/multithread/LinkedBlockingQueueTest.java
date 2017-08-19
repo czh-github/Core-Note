@@ -2,6 +2,8 @@ package com.laochen.source.java.multithread;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Date:2017/8/8 <p>
@@ -22,37 +24,33 @@ public class LinkedBlockingQueueTest {
 //        queue.add("6");
 //
 //        System.out.println(queue);
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                LinkedBlockingQueueTest test = new LinkedBlockingQueueTest();
-//                test.test();
-//            }
-//        }, 0L, 2000L);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LinkedBlockingQueueTest test = new LinkedBlockingQueueTest();
+                test.test();
+            }
+        }, 0L, 2000L);
 
-        int[][] a = new int[2][];
-        a[0] = new int[] {1,1,1};
-        a[1] = new int[] {2,3,4,5};
-        System.out.println(Arrays.deepToString(a));
-        System.out.println(a[0][3]);
     }
 
     private void test() {
 
         int remain = 10;
-        int[] counts = new int[remain];
+        int groups = 5;
+        int[] counts = new int[groups];
         int total = 0;
-        int[] results = new int[remain];
+        int[] results = new int[groups];
         Random random = new Random();
-        for (int i = 0; i < remain; i++) {
+        for (int i = 0; i < groups; i++) {
             counts[i] = random.nextInt(100);
             total += counts[i];
         }
-        total -= counts[2];
-        total -= counts[8];
-        counts[2] = 0;
-        counts[8] = 0;
+//        total -= counts[2];
+//        total -= counts[8];
+//        counts[2] = 0;
+//        counts[8] = 0;
         System.out.println(Arrays.toString(counts) + "total:" + total + ",remain:" + remain);
         func(remain, counts, total, results);
         System.out.println(Arrays.toString(results));
