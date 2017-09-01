@@ -1,4 +1,4 @@
-package com.laochen.source.java.multithread;
+package com.laochen.source.java.concurrency_multithread;
 
 import java.util.Arrays;
 import java.util.Random;

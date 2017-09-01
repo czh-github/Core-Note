@@ -3,6 +3,8 @@ package com.laochen.source.java.comparable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.laochen.source.java.innerclass.NestedInterface1.i;
+
 /**
  * Date:2017/8/14 <p>
  * Author:chenzehao@danale.com <p>
@@ -22,7 +24,7 @@ public class ComparableTest {
         list.add(7);
         list.add(10);
 
-        int i = binarySearch0(list, 0, list.size(), 11);
+//        int i = binarySearch0(list, 0, list.size(), 11);
         System.out.println(i);
     }
 
