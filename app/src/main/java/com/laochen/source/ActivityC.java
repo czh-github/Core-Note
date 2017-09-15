@@ -9,8 +9,8 @@ import android.widget.ImageView;
 
 import com.laochen.jni.R;
 
-public class ActivityB extends AppCompatActivity {
-    private static final String TAG = "ActivityB";
+public class ActivityC extends AppCompatActivity {
+    private static final String TAG = "ActivityC";
     private ImageView blurImageView;
     private ImageView avatarImageView;
 
@@ -25,7 +25,8 @@ public class ActivityB extends AppCompatActivity {
         blurImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ActivityB.this, ActivityC.class);
+                Intent intent = new Intent(ActivityC.this, ActivityB.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         });

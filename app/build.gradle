@@ -15,7 +15,19 @@ android {
                 cppFlags ""
             }
         }
+
+        // 启用java 8需要指定(1/2)
+//        jackOptions {
+//            enabled true
+//        }
     }
+
+    // 启用java 8需要指定(2/2)
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -34,6 +46,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+    // 以下两行添加permissions4m依赖
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.guava:guava:17.0'
@@ -41,5 +55,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'io.reactivex:rxjava:1.1.1'
+    compile 'com.github.jokermonn:permissions4m:2.0.0-lib'
     testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.github.jokermonn:permissions4m:2.0.0-processor'
 }
