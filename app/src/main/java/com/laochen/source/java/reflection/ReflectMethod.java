@@ -26,7 +26,7 @@ public class ReflectMethod {
         }
 
         // 根据名称获取某个声明的成员方法
-        Method declaredMethod = Entry.class.getDeclaredMethod("method1", null); // 方法没有参数，传null
+        Method declaredMethod = Entry.class.getDeclaredMethod("method1"); // 方法没有参数，传null
         System.out.println(declaredMethod);
 
         // 根据名称获取某个public成员方法
@@ -41,7 +41,7 @@ public class ReflectMethod {
 
         // 通过反射调用无访问权限的方法
         declaredMethod.setAccessible(true);
-        declaredMethod.invoke(entry, null); // 如果是static method，第一个参数传null
+        declaredMethod.invoke(entry); // 如果是static method，第一个参数传null
 
     }
 

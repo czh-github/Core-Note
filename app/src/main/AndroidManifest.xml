@@ -4,6 +4,12 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!--请求大概位置权限-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!--请求精确位置权限-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:name="com.laochen.source.java.collection.queue.JniApplication"
@@ -24,8 +30,7 @@
         </activity>
         -->
         <activity
-            android:name="com.laochen.source.android.notification.NotificationDemoActivity"
-            android:label="NotificationDemoActivity"
+            android:name="com.laochen.source.android.google_play_services.GoogleApiTestActivity"
             android:launchMode="standard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -42,6 +47,19 @@
             android:name="com.laochen.source.ActivityC"
             android:label="ActivityC"/>
         <activity android:name="com.laochen.source.android.permissions.PermissionsTestActivity">
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+
+        <service
+            android:name="com.laochen.source.android.activity_detect.DetectedActivitiesIntentService"
+            android:exported="false"/>
+        <service android:name="com.laochen.source.android.pedometer.StepService"/>
+
+        <activity android:name="com.laochen.source.android.pedometer.Settings"/>
+        <activity android:name="com.laochen.source.android.base.ParcelableActivity">
         </activity>
     </application>
 

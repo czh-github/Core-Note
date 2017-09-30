@@ -28,7 +28,7 @@ public class ReflectGeneric {
 
     public static void main(String[] args) throws Exception {
         // 获得泛型方法的返回类型的类型参数
-        Method getStringList = ReflectGeneric.class.getMethod("getStringList", null);
+        Method getStringList = ReflectGeneric.class.getMethod("getStringList");
         Type genericReturnType = getStringList.getGenericReturnType();
         if (genericReturnType instanceof ParameterizedType) {
             ParameterizedType type = (ParameterizedType) genericReturnType;

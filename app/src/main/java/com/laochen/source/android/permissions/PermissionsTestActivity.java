@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.joker.annotation.PermissionsCustomRationale;
 import com.joker.annotation.PermissionsDenied;
 import com.joker.annotation.PermissionsGranted;
 import com.joker.annotation.PermissionsRationale;
@@ -58,11 +57,11 @@ public class PermissionsTestActivity extends AppCompatActivity {
 
 //    注：系统弹出权限申请 dialog 与 toast 提示是异步操作，所以如果存在希望自行弹出一个 dialog 后
 //   （或其他同步需求）再弹出系统对话框，那么请使用 @PermissionsCustomRationale
-    @PermissionsCustomRationale(REQUEST_CODE_RECORD_AUDIO)
-    public void cusRational() {
+//    @PermissionsCustomRationale(REQUEST_CODE_RECORD_AUDIO)
+//    public void cusRational() {
 //        new AlertDialog.Builder(this)
 //                .setMessage("请开启录音权限")
 //                .setPositiveButton("确定", new Di)
-    }
+//    }
 
 }
